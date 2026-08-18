@@ -20,7 +20,7 @@
       <p class="hero-sub">Friends and family are rallying together for Sean's recovery. Chip in, share a memory, and leave a wish below.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#donate">💛 Support the Fund</a>
-        <a class="btn btn-ghost" href="#wishes">✍️ Leave a Wish</a>
+        <a class="btn btn-ghost" href="#wall">🎨 Add to the Wall</a>
       </div>
     </div>
   </header>
@@ -61,33 +61,61 @@
       <div class="gallery">
         <img src="photos/gallery-1.jpg" alt="Sean" loading="lazy" />
         <img src="photos/gallery-2.jpg" alt="Sean with family and friends" loading="lazy" />
+        <img src="photos/gallery-3.jpg" alt="Sean and Izze" loading="lazy" />
+        <img src="photos/gallery-4.jpg" alt="Sean" loading="lazy" />
       </div>
     </div>
   </section>
 
-  <!-- ============ WISHES WALL ============ -->
-  <section id="wishes" class="section wishes">
+  <!-- ============ THE WALL (collaborative tile mosaic) ============ -->
+  <section id="wall" class="section wall">
     <div class="container">
-      <h2 class="section-title">The Get-Well Wall</h2>
-      <p class="section-sub">Leave a message of love, a memory, or a bit of encouragement. It'll show up on the wall right away for Sean to read.</p>
+      <h2 class="section-title">The Wall for Sean</h2>
+      <p class="section-sub">Claim a tile, paint something or drop in a photo, and add it to the wall. Hundreds of little squares from everyone who loves Sean, coming together into one big, beautiful mosaic.</p>
 
-      <form id="wish-form" class="wish-form">
-        <div class="field-row">
-          <input type="text" id="wish-name" name="name" placeholder="Your name" maxlength="60" required />
+      <div class="tile-creator">
+        <div class="creator-fields">
+          <input type="text" id="tile-name" placeholder="Your name" maxlength="60" />
+          <input type="text" id="tile-message" placeholder="Optional note (shown when someone taps your tile)" maxlength="200" />
         </div>
-        <textarea id="wish-message" name="message" placeholder="Write your get-well wish…" maxlength="600" rows="3" required></textarea>
-        <div class="form-footer">
-          <span class="char-count"><span id="char-now">0</span>/600</span>
-          <button type="submit" class="btn btn-primary" id="wish-submit">Post my wish 💛</button>
-        </div>
-        <p id="wish-status" class="wish-status" role="status"></p>
-      </form>
 
-      <div id="wishes-wall" class="wishes-wall" aria-live="polite">
-        <p class="wall-empty" id="wall-empty">Loading wishes…</p>
+        <div class="editor">
+          <div class="canvas-wrap">
+            <canvas id="paint" width="400" height="400" aria-label="Your 400 by 400 tile — paint here"></canvas>
+          </div>
+          <div class="toolbar">
+            <div class="swatches" id="swatches"></div>
+            <label class="tool">Color <input type="color" id="color" value="#e8a34a" /></label>
+            <label class="tool">Brush <input type="range" id="size" min="2" max="48" value="12" /></label>
+            <button type="button" class="tool-btn" id="eraser">Eraser</button>
+            <button type="button" class="tool-btn" id="clear">Clear</button>
+            <label class="tool-btn upload">📷 Upload photo<input type="file" id="upload" accept="image/*" hidden /></label>
+          </div>
+        </div>
+
+        <div class="creator-footer">
+          <button type="button" class="btn btn-primary btn-lg" id="tile-submit">Add my tile to the wall 🎨</button>
+          <p id="tile-status" class="wish-status" role="status"></p>
+        </div>
+      </div>
+
+      <div id="mosaic" class="mosaic" aria-live="polite">
+        <p class="wall-empty" id="wall-empty">Loading the wall…</p>
       </div>
     </div>
   </section>
+
+  <!-- Lightbox for viewing a tile full-size -->
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
+    <div class="lightbox-inner" role="dialog" aria-modal="true">
+      <img id="lightbox-img" alt="" />
+      <div class="lightbox-meta">
+        <span class="from" id="lightbox-from"></span>
+        <p class="msg" id="lightbox-msg"></p>
+      </div>
+    </div>
+  </div>
 
   <footer class="footer">
     <p>Made with love for Sean 💛</p>

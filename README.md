@@ -1,63 +1,71 @@
-# Get Well Soon 💛
+# Get Well Soon, Sean 💛
 
-A warm, single-page get-well site with three parts:
+A warm, single-page site with three parts:
 
-1. **GoFundMe spotlight** — big donate card with a progress bar (or paste GoFundMe's own embed).
-2. **About section** — his story + a photo gallery.
-3. **The Get-Well Wall** — friends & family post wishes that appear **instantly** for everyone, powered by [Supabase](https://supabase.com) (free tier).
+1. **GoFundMe spotlight** — donate card linking to Sean's campaign.
+2. **Sean's Story** — his bio + a photo gallery.
+3. **The Wall** — a giant collaborative mosaic. Anyone can claim a 400×400 tile, **paint** on it (a mini MS-Paint) or **upload a photo**, and it drops into place. Hundreds of tiles form one chaotic, beautiful piece. Powered by [Supabase](https://supabase.com) (free tier).
 
-You can open `index.html` right now and it works in **preview mode** (wishes save in your own browser only). Do the two steps below to make it real.
-
----
-
-## Step 1 — Add your content
-
-Search `index.html` for these placeholders and replace them:
-
-- `[FRIEND'S NAME]` — his name (appears several times).
-- The About paragraphs.
-- The GoFundMe link: `https://www.gofundme.com/YOUR-CAMPAIGN`.
-- The progress numbers: `data-raised="8250" data-goal="20000"` and the matching `$8,250 raised` / `$20,000 goal` text.
-
-Drop photos into the `photos/` folder named:
-`hero.jpg`, `about-1.jpg`, `gallery-1.jpg` … `gallery-4.jpg`.
-(Until you do, friendly placeholders show up automatically.)
-
-> Prefer GoFundMe's official widget? On your campaign page: **Share → Add to your website**, copy the embed code, and paste it into the marked spot in the Donate section (you can delete the custom card).
+Open `index.html` right now and it works in **preview mode** (your tiles save to your own browser only). Do the setup below to make the wall real and shared.
 
 ---
 
-## Step 2 — Turn on the live Wishes Wall (Supabase)
+## Content — already filled in
 
-1. Create a free account at **supabase.com** → **New project**. Pick any name & password.
-2. In the left sidebar go to **SQL Editor**, paste the block below, and click **Run**:
+Sean's name, story, the GoFundMe link, and photos are all in place. To swap or add photos, drop files in `photos/` named `hero.jpg`, `about-1.jpg`, and `gallery-1.jpg` … `gallery-4.jpg`.
+
+---
+
+## Setup — turn on the live Wall (about 10 min)
+
+The wall needs a place to store tile images and a table to track them. Both live in one free Supabase project.
+
+### 1. Create the project
+Sign up at **supabase.com** → **New project** (any name & password).
+
+### 2. Create the table
+Left sidebar → **SQL Editor** → paste and **Run**:
 
 ```sql
--- Table to hold get-well wishes
-create table public.wishes (
+create table public.tiles (
   id          bigint generated always as identity primary key,
   name        text not null check (char_length(name) between 1 and 60),
-  message     text not null check (char_length(message) between 1 and 600),
+  message     text check (char_length(message) <= 200),
+  image_url   text not null,
   created_at  timestamptz not null default now()
 );
 
--- Lock it down, then allow exactly what the public page needs
-alter table public.wishes enable row level security;
+alter table public.tiles enable row level security;
 
--- Anyone can READ wishes
-create policy "wishes are public to read"
-  on public.wishes for select
-  to anon using (true);
+create policy "tiles are public to read"
+  on public.tiles for select to anon using (true);
 
--- Anyone can ADD a wish (but not edit or delete)
-create policy "anyone can post a wish"
-  on public.wishes for insert
-  to anon with check (true);
+create policy "anyone can add a tile"
+  on public.tiles for insert to anon with check (true);
 ```
 
-3. Turn on live updates: **Database → Publications → `supabase_realtime`** → toggle the **`wishes`** table on.
-4. Get your keys: **Project Settings → API**. Copy the **Project URL** and the **anon / public** key.
-5. Paste them into `config.js`:
+### 3. Create the image storage bucket
+Left sidebar → **Storage** → **New bucket** → name it exactly **`tiles`** → toggle **Public bucket ON** → save.
+
+Then let visitors upload into it: **SQL Editor** → paste and **Run**:
+
+```sql
+-- anyone can upload a tile image
+create policy "anyone can upload a tile image"
+  on storage.objects for insert to anon
+  with check (bucket_id = 'tiles');
+
+-- anyone can view tile images
+create policy "tile images are public"
+  on storage.objects for select to anon
+  using (bucket_id = 'tiles');
+```
+
+### 4. Turn on live updates
+**Database → Publications → `supabase_realtime`** → toggle the **`tiles`** table on. (New tiles then appear for everyone without a refresh.)
+
+### 5. Add your keys
+**Project Settings → API** → copy the **Project URL** and **anon / public** key into `config.js`:
 
 ```js
 window.GETWELL_CONFIG = {
@@ -66,18 +74,24 @@ window.GETWELL_CONFIG = {
 };
 ```
 
-That's it — reload the page and wishes are now permanent, shared, and live.
+Reload the page — the wall is now live and shared. 🎉
 
-> **Is it safe to put the anon key in the code?** Yes. It's designed to be public. The Row Level Security policies above are what actually control access: the public can only read wishes and add new ones — nothing else.
-
-### Deleting spam / bad posts
-Open your Supabase project → **Table Editor → wishes** → select a row → delete. It disappears from the wall.
+> **Is the anon key safe to publish?** Yes, it's meant to be public. The policies above are the real guardrails: visitors can only read tiles and add new ones — nothing else.
 
 ---
 
-## Step 3 — Publish
+## Moderating the wall
 
-This is a plain static site, so any host works. Easiest: drag this folder onto **netlify.com/drop**, or push to GitHub and connect it to Netlify. No build step, no `netlify.toml` needed.
+Because tiles appear instantly on a public link, keep the dashboard handy:
+
+- **Remove a bad tile:** Supabase → **Table Editor → tiles** → delete the row. (Optionally also delete the file under **Storage → tiles**.)
+- Want tiles to require your approval *before* showing instead? Tell Claude and it'll switch the wall to approval-first.
+
+---
+
+## Publish
+
+Already connected to Netlify via the `G00DTECH/getwell` GitHub repo — every push auto-deploys. No build step needed.
 
 ---
 
@@ -85,8 +99,8 @@ This is a plain static site, so any host works. Easiest: drag this folder onto *
 
 | File | What it is |
 |------|-----------|
-| `index.html` | The page + all content placeholders |
+| `index.html` | The page + all content |
 | `styles.css` | All styling |
-| `app.js` | Progress bar + wishes wall logic |
+| `app.js` | Paint tool, photo upload, mosaic wall, lightbox |
 | `config.js` | Your Supabase keys (safe to commit) |
-| `photos/` | Drop his photos here |
+| `photos/` | Sean's photos |
