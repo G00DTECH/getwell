@@ -77,7 +77,7 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; line-hei
 .about-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: center; margin-bottom: 44px; }
 .about-text p { font-size: 1.1rem; color: var(--muted); margin-bottom: 16px; }
 .about-portrait img { width: 100%; border-radius: var(--radius); box-shadow: var(--shadow); display: block; }
-.gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; max-width: 760px; margin: 0 auto; }
 .gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 14px; box-shadow: 0 6px 20px rgba(120,90,50,.08); }
 
 /* ---------- Wishes ---------- */
