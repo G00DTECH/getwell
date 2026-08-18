@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Well Soon, [FRIEND'S NAME]</title>
+  <meta name="description" content="A place for friends and family to support [FRIEND'S NAME] and send get-well wishes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Sending love &amp; strength to</p>
+      <h1>[FRIEND'S NAME]</h1>
+      <p class="hero-sub">Friends and family are rallying together. Chip in, share a memory, and leave a wish below.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#donate">💛 Support the Fund</a>
+        <a class="btn btn-ghost" href="#wishes">✍️ Leave a Wish</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ DONATE / GOFUNDME SPOTLIGHT ============ -->
+  <section id="donate" class="section donate">
+    <div class="container">
+      <div class="donate-card">
+        <div class="donate-media">
+          <img src="photos/hero.jpg" alt="[FRIEND'S NAME]" onerror="this.src='https://placehold.co/600x600/ffe9d6/c9682c?text=Add+photos/hero.jpg'" />
+        </div>
+        <div class="donate-body">
+          <span class="badge">GoFundMe</span>
+          <h2>Help [FRIEND'S NAME] on the road to recovery</h2>
+          <p>Every contribution, big or small, helps cover medical costs and lets [him/her/them] focus on healing. Thank you for being part of this.</p>
+
+          <!-- Progress bar: update these two numbers, or delete this block if you embed the widget below -->
+          <div class="progress" data-raised="8250" data-goal="20000">
+            <div class="progress-track"><div class="progress-fill"></div></div>
+            <div class="progress-stats">
+              <strong class="raised">$8,250 raised</strong>
+              <span class="goal">of $20,000 goal</span>
+            </div>
+          </div>
+
+          <a class="btn btn-primary btn-lg" href="https://www.gofundme.com/YOUR-CAMPAIGN" target="_blank" rel="noopener">Donate on GoFundMe →</a>
+          <p class="donate-note">You'll be taken to the official GoFundMe page to give securely.</p>
+        </div>
+      </div>
+
+      <!-- OPTIONAL: paste GoFundMe's official embed widget here instead of the card above.
+           Get it from your campaign → Share → "Add to your website". -->
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="about" class="section about">
+    <div class="container">
+      <h2 class="section-title">About [FRIEND'S NAME]</h2>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>[Write a warm paragraph here. Who is he? What does everyone love about him? What's he going through, and what does recovery look like?]</p>
+          <p>[A second paragraph. Share a bit of his personality, his passions, the things this community is cheering him back toward.]</p>
+        </div>
+        <figure class="about-portrait">
+          <img src="photos/about-1.jpg" alt="[FRIEND'S NAME]" onerror="this.src='https://placehold.co/500x600/e6f0ea/3d7a5a?text=photos/about-1.jpg'" />
+        </figure>
+      </div>
+
+      <div class="gallery">
+        <img src="photos/gallery-1.jpg" alt="" onerror="this.src='https://placehold.co/400x400/f4e6ef/8a4d78?text=gallery-1'" />
+        <img src="photos/gallery-2.jpg" alt="" onerror="this.src='https://placehold.co/400x400/e6eef4/3d5f7a?text=gallery-2'" />
+        <img src="photos/gallery-3.jpg" alt="" onerror="this.src='https://placehold.co/400x400/f4f0e6/7a6a3d?text=gallery-3'" />
+        <img src="photos/gallery-4.jpg" alt="" onerror="this.src='https://placehold.co/400x400/eef4e6/5f7a3d?text=gallery-4'" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WISHES WALL ============ -->
+  <section id="wishes" class="section wishes">
+    <div class="container">
+      <h2 class="section-title">The Get-Well Wall</h2>
+      <p class="section-sub">Leave a message of love, a memory, or a bit of encouragement. It'll show up on the wall right away for [FRIEND'S NAME] to read.</p>
+
+      <form id="wish-form" class="wish-form">
+        <div class="field-row">
+          <input type="text" id="wish-name" name="name" placeholder="Your name" maxlength="60" required />
+        </div>
+        <textarea id="wish-message" name="message" placeholder="Write your get-well wish…" maxlength="600" rows="3" required></textarea>
+        <div class="form-footer">
+          <span class="char-count"><span id="char-now">0</span>/600</span>
+          <button type="submit" class="btn btn-primary" id="wish-submit">Post my wish 💛</button>
+        </div>
+        <p id="wish-status" class="wish-status" role="status"></p>
+      </form>
+
+      <div id="wishes-wall" class="wishes-wall" aria-live="polite">
+        <p class="wall-empty" id="wall-empty">Loading wishes…</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>Made with love for [FRIEND'S NAME] 💛</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
