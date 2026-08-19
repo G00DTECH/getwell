@@ -5,6 +5,6 @@
 //  policies permit (insert + read wishes, nothing else).
 // ============================================================
 window.GETWELL_CONFIG = {
-  SUPABASE_URL: "https://YOUR-PROJECT.supabase.co",
-  SUPABASE_ANON_KEY: "YOUR-ANON-PUBLIC-KEY",
+  SUPABASE_URL: "https://mrnpvyzhfcbnqmelffyu.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_d06Y5OrDc6lZLjO9BJjYww_TdiN5Afr",
 };
