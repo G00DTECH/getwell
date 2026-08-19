@@ -147,9 +147,20 @@
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "tile";
-    btn.innerHTML =
-      '<img src="' + t.image_url + '" alt="Tile by ' + esc(t.name) + '" loading="lazy" />' +
-      '<span class="tile-name">' + esc(t.name) + "</span>";
+
+    const img = document.createElement("img");
+    img.loading = "lazy";
+    img.alt = "Tile by " + t.name;
+    // If the image is missing (e.g. deleted from Storage), drop the whole tile
+    // instead of showing a blank card.
+    img.addEventListener("error", () => btn.remove());
+    img.src = t.image_url;
+
+    const label = document.createElement("span");
+    label.className = "tile-name";
+    label.textContent = t.name;
+
+    btn.append(img, label);
     btn.addEventListener("click", () => openLightbox(t));
     if (prepend && mosaic.firstChild) mosaic.insertBefore(btn, mosaic.firstChild);
     else mosaic.appendChild(btn);
