@@ -31,10 +31,14 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; line-hei
 
 /* ---------- Buttons ---------- */
 .btn {
-  display: inline-block; text-decoration: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+  text-decoration: none; cursor: pointer;
   font-weight: 600; font-size: 1rem; border: none; border-radius: 999px;
   padding: 13px 26px; transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
 }
+
+/* Lucide inline icons (from the styleseed icon set) */
+.icon { width: 1.15em; height: 1.15em; display: inline-block; vertical-align: -.18em; flex: none; }
 .btn:active { transform: translateY(1px); }
 .btn-primary { background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: #fff; box-shadow: 0 6px 18px rgba(201, 104, 44, .28); }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(201, 104, 44, .34); }
@@ -117,12 +121,12 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; line-hei
 .tool input[type="color"] { width: 30px; height: 30px; border: none; background: none; padding: 0; cursor: pointer; }
 .tool input[type="range"] { width: 90px; }
 .tool-btn {
+  display: inline-flex; align-items: center; gap: .4em;
   font-family: inherit; font-size: .88rem; font-weight: 600; color: var(--ink); cursor: pointer;
   background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px;
 }
 .tool-btn:hover { border-color: var(--gold); }
 .tool-btn.active { background: var(--gold); color: #fff; border-color: var(--gold); }
-.tool-btn.upload { display: inline-flex; align-items: center; }
 
 .creator-footer { text-align: center; margin-top: 22px; }
 

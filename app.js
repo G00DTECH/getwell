@@ -186,7 +186,7 @@
 
   /* ============ PREVIEW MODE (no Supabase yet) ============ */
   if (!configured) {
-    setStatus("⚠︎ Preview mode — add your Supabase keys in config.js so everyone's tiles are saved & shared (see README).", "");
+    setStatus("Preview mode — add your Supabase keys in config.js so everyone's tiles are saved & shared (see README).", "");
     const demo = JSON.parse(localStorage.getItem("getwell_tiles") || "[]");
     if (!demo.length && empty) empty.textContent = "No tiles yet. Be the first to add one!";
     demo.forEach((t) => renderTile(t));
@@ -239,7 +239,7 @@
       seen.add(ins.data.id);
       renderTile({ name: v.name, message: v.message, image_url: pub.publicUrl }, true);
       resetCreator();
-      setStatus("Your tile is on the wall! 🎨", "success");
+      setStatus("Your tile is on the wall!", "success");
     } catch (err) {
       console.error(err);
       setStatus("Something went wrong adding your tile. Please try again.", "error");
