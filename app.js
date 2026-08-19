@@ -27,8 +27,12 @@
   const sizeEl = document.getElementById("size");
   const eraserBtn = document.getElementById("eraser");
   const clearBtn = document.getElementById("clear");
+  const undoBtn = document.getElementById("undo");
   const uploadEl = document.getElementById("upload");
   const mosaic = document.getElementById("mosaic");
+  const zoomEl = document.getElementById("zoom");
+  const overviewBtn = document.getElementById("overview");
+  const countEl = document.getElementById("mosaic-count");
   let empty = document.getElementById("wall-empty");
 
   // ---- helpers ----
@@ -50,6 +54,29 @@
   resetCanvas();
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
+
+  // ---- undo history (snapshot before each change, revert on undo) ----
+  const history = [];
+  const HISTORY_MAX = 30;
+  function snapshot() {
+    try {
+      history.push(ctx.getImageData(0, 0, TILE, TILE));
+      if (history.length > HISTORY_MAX) history.shift();
+    } catch (e) { /* getImageData can fail if tainted; ignore */ }
+    undoBtn.disabled = history.length === 0;
+  }
+  function undo() {
+    if (!history.length) return;
+    ctx.putImageData(history.pop(), 0, 0);
+    undoBtn.disabled = history.length === 0;
+  }
+  function clearHistory() { history.length = 0; undoBtn.disabled = true; }
+  undoBtn.addEventListener("click", undo);
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea") return; // don't hijack text undo
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); }
+  });
 
   let color = colorEl.value;
   let brush = Number(sizeEl.value);
@@ -84,7 +111,7 @@
     erasing = !erasing;
     eraserBtn.classList.toggle("active", erasing);
   });
-  clearBtn.addEventListener("click", resetCanvas);
+  clearBtn.addEventListener("click", () => { snapshot(); resetCanvas(); });
 
   function pos(e) {
     const r = canvas.getBoundingClientRect();
@@ -108,6 +135,7 @@
     ctx.stroke();
   }
   canvas.addEventListener("pointerdown", (e) => {
+    snapshot(); // save state before this stroke so Undo can revert it
     drawing = true;
     last = pos(e);
     paintDot(last);
@@ -129,6 +157,7 @@
     if (!f) return;
     const img = new Image();
     img.onload = () => {
+      snapshot(); // let Undo revert an accidental photo drop
       resetCanvas();
       const scale = Math.max(TILE / img.width, TILE / img.height);
       const w = img.width * scale, h = img.height * scale;
@@ -140,6 +169,26 @@
     img.src = URL.createObjectURL(f);
     uploadEl.value = "";
   });
+
+  // ---- full-wall zoom controls ----
+  zoomEl.addEventListener("input", () => {
+    mosaic.style.setProperty("--tile-min", zoomEl.value + "px");
+    overviewBtn.classList.toggle("active", Number(zoomEl.value) <= 60);
+  });
+  overviewBtn.addEventListener("click", () => {
+    const on = !overviewBtn.classList.contains("active");
+    const v = on ? 40 : 120;
+    zoomEl.value = v;
+    mosaic.style.setProperty("--tile-min", v + "px");
+    overviewBtn.classList.toggle("active", on);
+  });
+
+  // ---- live tile count ----
+  let tileCount = 0;
+  function updateCount(delta) {
+    tileCount = Math.max(0, tileCount + delta);
+    countEl.textContent = tileCount ? tileCount + (tileCount === 1 ? " tile" : " tiles") : "";
+  }
 
   // ---- rendering tiles ----
   function renderTile(t, prepend) {
@@ -153,8 +202,9 @@
     img.alt = "Tile by " + t.name;
     // If the image is missing (e.g. deleted from Storage), drop the whole tile
     // instead of showing a blank card.
-    img.addEventListener("error", () => btn.remove());
+    img.addEventListener("error", () => { btn.remove(); updateCount(-1); });
     img.src = t.image_url;
+    updateCount(1);
 
     const label = document.createElement("span");
     label.className = "tile-name";
@@ -191,6 +241,7 @@
   }
   function resetCreator() {
     resetCanvas();
+    clearHistory();
     nameEl.value = "";
     msgEl.value = "";
   }
