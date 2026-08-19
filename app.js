@@ -136,7 +136,7 @@
       URL.revokeObjectURL(img.src);
       setStatus("Photo added to your tile. Add a name, then post it!", "");
     };
-    img.onerror = () => setStatus("Couldn't read that image, try another.", "error");
+    img.onerror = () => setStatus("Couldn't read that image. Please try another.", "error");
     img.src = URL.createObjectURL(f);
     uploadEl.value = "";
   });
@@ -197,7 +197,7 @@
 
   /* ============ PREVIEW MODE (no Supabase yet) ============ */
   if (!configured) {
-    setStatus("Preview mode — add your Supabase keys in config.js so everyone's tiles are saved & shared (see README).", "");
+    setStatus("Preview mode. Add your Supabase keys in config.js so everyone's tiles are saved and shared (see README).", "");
     const demo = JSON.parse(localStorage.getItem("getwell_tiles") || "[]");
     if (!demo.length && empty) empty.textContent = "No tiles yet. Be the first to add one!";
     demo.forEach((t) => renderTile(t));
