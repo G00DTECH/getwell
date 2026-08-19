@@ -68,6 +68,7 @@
   function undo() {
     if (!history.length) return;
     ctx.putImageData(history.pop(), 0, 0);
+    pendingGif = null;
     undoBtn.disabled = history.length === 0;
   }
   function clearHistory() { history.length = 0; undoBtn.disabled = true; }
@@ -83,6 +84,12 @@
   let erasing = false;
   let drawing = false;
   let last = null;
+
+  // If the user uploads a GIF, we keep the original file and post it as-is so it
+  // stays animated (the canvas only holds a still preview frame). Painting/clearing
+  // cancels it and falls back to the canvas PNG.
+  let pendingGif = null;
+  const MAX_GIF_BYTES = 5 * 1024 * 1024;
 
   const palette = ["#2c2724", "#ffffff", "#e63946", "#e8a34a", "#f4d35e",
     "#3d7a5a", "#4d8fbf", "#8a4d78", "#c9682c", "#ec9ec4"];
@@ -111,7 +118,7 @@
     erasing = !erasing;
     eraserBtn.classList.toggle("active", erasing);
   });
-  clearBtn.addEventListener("click", () => { snapshot(); resetCanvas(); });
+  clearBtn.addEventListener("click", () => { snapshot(); resetCanvas(); pendingGif = null; });
 
   function pos(e) {
     const r = canvas.getBoundingClientRect();
@@ -136,6 +143,7 @@
   }
   canvas.addEventListener("pointerdown", (e) => {
     snapshot(); // save state before this stroke so Undo can revert it
+    pendingGif = null; // painting over a GIF means post the drawing instead
     drawing = true;
     last = pos(e);
     paintDot(last);
@@ -155,15 +163,27 @@
   uploadEl.addEventListener("change", () => {
     const f = uploadEl.files && uploadEl.files[0];
     if (!f) return;
+    const isGif = f.type === "image/gif";
+    if (isGif && f.size > MAX_GIF_BYTES) {
+      setStatus("That GIF is over 5 MB. Please pick a smaller one.", "error");
+      uploadEl.value = "";
+      return;
+    }
     const img = new Image();
     img.onload = () => {
-      snapshot(); // let Undo revert an accidental photo drop
+      snapshot(); // let Undo revert an accidental upload
       resetCanvas();
       const scale = Math.max(TILE / img.width, TILE / img.height);
       const w = img.width * scale, h = img.height * scale;
       ctx.drawImage(img, (TILE - w) / 2, (TILE - h) / 2, w, h);
       URL.revokeObjectURL(img.src);
-      setStatus("Photo added to your tile. Add a name, then post it!", "");
+      if (isGif) {
+        pendingGif = f; // post the animated original; canvas shows a still preview
+        setStatus("GIF added. It'll animate on the wall. Add a name, then post it.", "");
+      } else {
+        pendingGif = null;
+        setStatus("Photo added to your tile. Add a name, then post it!", "");
+      }
     };
     img.onerror = () => setStatus("Couldn't read that image. Please try another.", "error");
     img.src = URL.createObjectURL(f);
@@ -242,6 +262,7 @@
   function resetCreator() {
     resetCanvas();
     clearHistory();
+    pendingGif = null;
     nameEl.value = "";
     msgEl.value = "";
   }
@@ -256,7 +277,8 @@
     submitBtn.addEventListener("click", () => {
       const v = validate();
       if (!v) return;
-      const t = { name: v.name, message: v.message, image_url: canvas.toDataURL("image/png"), created_at: new Date().toISOString() };
+      const image_url = pendingGif ? URL.createObjectURL(pendingGif) : canvas.toDataURL("image/png");
+      const t = { name: v.name, message: v.message, image_url, created_at: new Date().toISOString() };
       demo.unshift(t);
       try { localStorage.setItem("getwell_tiles", JSON.stringify(demo)); }
       catch (e) { /* localStorage full in preview — ignore */ }
@@ -291,9 +313,13 @@
     submitBtn.disabled = true;
     setStatus("Adding your tile…", "");
     try {
-      const blob = await toBlob();
-      const fileName = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2)) + ".png";
-      const up = await supa.storage.from("tiles").upload(fileName, blob, { contentType: "image/png", upsert: false });
+      // GIF: upload the original animated file. Otherwise: flatten the canvas to PNG.
+      const blob = pendingGif || await toBlob();
+      const ext = pendingGif ? "gif" : "png";
+      const type = pendingGif ? "image/gif" : "image/png";
+      const id = crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random().toString(36).slice(2);
+      const fileName = id + "." + ext;
+      const up = await supa.storage.from("tiles").upload(fileName, blob, { contentType: type, upsert: false });
       if (up.error) throw up.error;
       const { data: pub } = supa.storage.from("tiles").getPublicUrl(fileName);
       const ins = await supa.from("tiles").insert({ name: v.name, message: v.message, image_url: pub.publicUrl }).select("id").single();
